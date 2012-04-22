@@ -3,13 +3,15 @@
   "version": "0.0.1",
   "author": "Daniel Nelson <daniel@populr.me>",
   "description": "a node.js image resize service",
-  "contributors": [ 
+  "contributors": [
     {
       "name": "Blake Blackshear",
       "email": "blakeb@blakeshome.com"
-    } 
+    }
   ],
   "dependencies" : {
+    "hiredis" : "0.1.14",
+    "redis"   :  "0.7.1",
     "sunny"   :  "0.0.4",
     "async"   :  "0.1.18"
   },

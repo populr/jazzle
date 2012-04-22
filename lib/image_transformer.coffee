@@ -1,6 +1,7 @@
 class ImageTransformer
-  init: (s3, redis) ->
-    @s3 = s3
+
+  constructor: (imageStore, redis) ->
+    @imageStore = imageStore
     @redis = redis
 
   clearCache: (pathToImage, response) ->
@@ -16,22 +17,33 @@ class ImageTransformer
 
   _clearCache: (pathToImage, finish) ->
     console.log '_clearCache'
-    [bucket, key] = @s3Location(pathToImage)
+    [bucket, key] = @imageStoreLocation(pathToImage)
     console.log "bucket: #{bucket}, key: #{key}"
     finish()
 
   _transform: (pathToImage, finish) ->
     console.log '_transform'
-    [bucket, key] = @s3Location(pathToImage)
+    [bucket, key] = @imageStoreLocation(pathToImage)
     console.log "bucket: #{bucket}, key: #{key}"
-    s3Url = ''
-    finish(s3Url)
+    imageStoreUrl = "//imageStore.amazonaws.com/#{pathToImage}"
+    @imageStore.getImage bucket, key, './tmp/wegotit.jpg', () =>
+      # success
+      @imageStore.storeImage './tmp/wegotit.jpg', bucket, 'node_transformer.jpg', () ->
+        console.log 'success!!!!'
+        finish(imageStoreUrl)
+      , (error) ->
+        # error
+        console.log error
+        finish('')
+    , () ->
+      # error
+      finish('')
 
 
-  s3Location: (request) ->
-    console.log "s3Location: #{request}"
-    # remove #s3.amazonaws.com/, then get the next part as the bucket, and everything after as the key
-    regexp = /https?:\/\/(?:s3.amazonaws.com\/)?([^\/]*)(.*)$/
+  imageStoreLocation: (request) ->
+    console.log "imageStoreLocation: #{request}"
+    # remove #imageStore.amazonaws.com/, then get the next part as the bucket, and everything after as the key
+    regexp = /https?:\/\/(?:imageStore.amazonaws.com\/)?([^\/]*)\/(.*)$/
     matches = request.match(regexp)
     [matches[1], matches[2]]
 

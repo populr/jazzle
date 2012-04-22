@@ -1,14 +1,14 @@
 (function() {
-  var Config, Redis, S3, Transformer, config, redis, router, s3, server, transformer;
+  var Config, ImageStore, Redis, Transformer, config, imageStore, redis, router, server, transformer;
   server = require('./lib/server');
   router = require('./lib/router');
+  Redis = require('redis');
   Config = require('./lib/config').Config;
-  S3 = require('./lib/image_store').ImageStore;
-  Redis = require('redis').Redis;
+  ImageStore = require('./lib/image_store').ImageStore;
   Transformer = require('./lib/image_transformer').ImageTransformer;
   config = new Config().config();
-  s3 = new S3(config.aws.public, config.aws.secret);
-  redis = new Redis().createClient(config.redis.port, config.redis.host);
-  transformer = new Transformer(s3, redis);
+  imageStore = new ImageStore(config.imageStore);
+  redis = new Redis.createClient(config.redis.port, config.redis.host);
+  transformer = new Transformer(imageStore, redis);
   server.start(router.route, transformer);
 }).call(this);
